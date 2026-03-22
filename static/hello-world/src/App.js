@@ -8,11 +8,13 @@ import {
     Spinner,
     ErrorMessage,
     Text,
+    List,
+    ListItem,
 } from '@forge/react';
 
 const App = () => {
     const [projects, setProjects] = useState([]);
-    const [selectedProject, setSelectedProject] = useState(null);
+    const [selectedProject, setSelectedProject] = useState('adelaide');
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(false);
     const [projectsLoading, setProjectsLoading] = useState(false);
@@ -35,7 +37,9 @@ const App = () => {
             setProjects(projectOptions);
             if (projectOptions.length > 0) {
                 setSelectedProject(projectOptions[0].value);
+                console.log('Selected first project:', projectOptions[0].value);
             }
+            console.log('Total projects loaded:', projectOptions.length);
         } catch (err) {
             setProjectsError(`Failed to fetch projects: ${err.message}`);
             console.error(err);
@@ -81,21 +85,23 @@ const App = () => {
             {/* Project Selection Section */}
             <Box padding="space.400">
                 <Stack space="space.300">
-                    <Heading level="h1">Select a Project</Heading>
+                    <Heading level="h1">All Projects</Heading>
                     {projectsError && <ErrorMessage>{projectsError}</ErrorMessage>}
                     {projectsLoading ? (
                         <Spinner />
+                    ) : projects && projects.length > 0 ? (
+                        <List>
+                            {projects.map((project, index) => (
+                                <ListItem key={project.value || index}>
+                                    <Text>{project.label} ({project.value})</Text>
+                                </ListItem>
+                            ))}
+                        </List>
                     ) : (
-                        <Select
-                        appearance='default'
-                            options={projects}
-                            value={selectedProject}
-                            onChange={(option) => setSelectedProject(option.value)}
-                            placeholder="Choose a project..."
-                        />
+                        <Text>No projects found</Text>
                     )}
                     {selectedProject && (
-                        <Text>Selected project: <strong>{selectedProject}</strong></Text>
+                        <Text>Total projects: {projects ? projects.length : 0}</Text>
                     )}
                 </Stack>
             </Box>
