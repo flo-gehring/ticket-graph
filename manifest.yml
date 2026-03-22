@@ -1,0 +1,22 @@
+modules:
+  jira:globalPage:
+    - key: ticket-graph-hello-world-page
+      resource: main
+      title: Ticket Graph
+      resolver:
+        function: resolver
+  function:
+    - key: resolver
+      handler: index.handler
+permissions:
+  scopes:
+      - "read:jira-user"
+resources:
+  - key: main
+    path: static/hello-world/build
+app:
+  runtime:
+    name: nodejs24.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/a623612e-547b-48f2-b19d-a84977e2b932
