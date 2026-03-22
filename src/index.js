@@ -10,23 +10,37 @@ resolver.define('getText', (req) => {
 });
 
 resolver.define('getProjects', async (req) => {
-    console.log('Fetching projects...');
+    console.log('Fetching all projects...');
 
     try {
-        // Now use api.asApp() with route for Jira project search
-        const response = await api.asApp().requestJira(route`/rest/api/3/project/search`, {
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
+        const allProjects = [];
+        let startAt = 0;
+        const maxResults = 100;
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`API error: ${response.status} - ${errorText}`);
+        while (true) {
+            const response = await api.asApp().requestJira(route`/rest/api/3/project/search?startAt=${startAt}&maxResults=${maxResults}`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`API error: ${response.status} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            const values = Array.isArray(data.values) ? data.values : [];
+            allProjects.push(...values);
+
+            const nextStartAt = data.startAt + data.maxResults;
+            if (nextStartAt >= data.total) {
+                break;
+            }
+            startAt = nextStartAt;
         }
 
-        const data = await response.json();
-        return data;
+        return { values: allProjects };
     } catch (error) {
         console.error('Error fetching projects:', error);
         throw error;
